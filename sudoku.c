@@ -8,6 +8,26 @@ uint8_t field[9][9];
 bool isProtected[9][9];
 char lastInput[] = {'0','0','0'};
 
+void loadLevel() {
+  uint8_t level1[9][9] = {{1,2,3,0,0,0,0,0,0},
+                          {9,0,0,0,0,0,0,0,0},
+                          {0,0,0,0,0,0,0,0,0},
+                          {0,0,0,0,0,0,0,0,0},
+                          {0,0,0,0,0,0,0,0,0},
+                          {0,0,0,0,0,0,0,0,0},
+                          {0,0,0,0,0,0,0,0,0},
+                          {0,0,0,0,0,0,0,0,0},
+                          {0,0,0,0,0,0,0,0,0}};
+  for (uint8_t i = 0; i < 9; i++){
+    for (uint8_t j = 0; j < 9; j++){
+      field[i][j] = level1[j][i];
+      if (field[i][j] != 0){
+        isProtected[i][j] = true;
+      }
+    }
+  }
+}
+
 void draw() {
   printf("  __          _     _             \n");
   printf(" (_    | |   | \\   / \\   |/    | |\n");
@@ -22,6 +42,9 @@ void draw() {
     printf("%d |",y+1);
     for (uint8_t x = 0; x < 9; x++) {
       if (field[x][y]!=0)
+        if(isProtected[x][y])
+          printf("[%d]",field[x][y]);
+        else
         printf(" %d ",field[x][y]);
       else
         printf(" . ");
@@ -80,7 +103,7 @@ void game(){
           if ((input[0]=='0' || input[2]=='0') && (input[0]!='0' || input[2]!='0' || input[4]!='0'))
             validInput[0] = validInput[1] = validInput[2] = false;
 
-        if (input[0]=='c' && input[2]=='-' && input[4]=='-'){
+        if (input[0]=='c'){
           check();
           i = 10; //end for loop
         };
@@ -95,7 +118,8 @@ void game(){
     lastInput[0] = input[0];
     lastInput[1] = input[2];
     lastInput[2] = field[input[0]-1][input[2]-1];
-    field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
+    if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
+      field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
   }
 
 }// end of game loop
@@ -107,6 +131,7 @@ int main() {
       field[x][y] = 0;
     }
   }
+  loadLevel();
   game();
   printf("GEWONNEN!\nGut gemacht!\n");
 
