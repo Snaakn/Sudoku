@@ -23,7 +23,8 @@ void loadLevel() {
       field[i][j] = level1[j][i];
       if (field[i][j] != 0){
         isProtected[i][j] = true;
-      }
+      } else
+          isProtected[i][j] = false;
     }
   }
 }
@@ -58,13 +59,22 @@ void draw() {
   printf("  +−−−−−−−−−+−−−−−−−−−+−−−−−−−−−+\n");
 }
 
-void check()
-{
-  for (uint8_t i = 0; i < 100; i++) {
-    if (i%5 == 0)
-      printf("*");
+bool check() {
+  const uint32_t fac9 = 362880;
+  for (uint8_t i = 0; i < 9; i++) {
+    uint32_t xfac = 1;
+    uint32_t yfac = 1;
+    for (uint8_t j = 0; j < 9; j++) {
+      xfac *= field[i][j];
+      yfac *= field[j][i];
+    }
+    if (xfac != fac9 || yfac != fac9) {
+      printf("%u %u\n",xfac,yfac);
+      printf("\nchecked\n");
+      return false;
+    }
   }
-  printf("\nchecked\n");
+  return true;
 }
 
 void game(){
@@ -90,37 +100,39 @@ void game(){
 
       validInput[0] = validInput[1] = validInput[2] = false;
 
-      for (uint8_t i=0; i<=9; i++) {
-        if (input[0] == allowed[i]) {
-          printf("1 true\n");
-          validInput[0] = true;}
-        if (input[2] == allowed[i]) {
-          printf("2 true\n");
-          validInput[1] = true;}
-        if (input[4] == allowed[i]) {
-          printf("3 true\n");
-          validInput[2] = true;}
-          if ((input[0]=='0' || input[2]=='0') && (input[0]!='0' || input[2]!='0' || input[4]!='0'))
+        for (uint8_t i=0; i<=9; i++) {
+          if (input[0] == allowed[i]) {
+            printf("1 true\n");
+            validInput[0] = true;}
+          if (input[2] == allowed[i]) {
+            printf("2 true\n");
+            validInput[1] = true;}
+          if (input[4] == allowed[i]) {
+            printf("3 true\n");
+            validInput[2] = true;}
+          if ((input[0]=='0' || input[2]=='0') && (input[4]!='0' || input[2]!='0' || input[4]!='0'))
             validInput[0] = validInput[1] = validInput[2] = false;
+        }
 
-        if (input[0]=='c'){
-          check();
-          i = 10; //end for loop
-        };
-      }
+
       // if (input[0]=='0' && input[2]=='0' && input[4]=='0') {
       //   undo();
       // }
 
-    } while (validInput[0] == false || validInput[1] == false || validInput[2] == false);
+    } while ((input[0]!='c') && ((validInput[0] == false) || (validInput[1] == false) || (validInput[2] == false)));
     // saving last value of input coordinates for undo function
     // idea: timeline for multiple undos
-    lastInput[0] = input[0];
-    lastInput[1] = input[2];
-    lastInput[2] = field[input[0]-1][input[2]-1];
-    if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
-      field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
-  }
+    if (input[0]=='c'){
+      isWon=check();
+    }
+    else{
+      lastInput[0] = input[0];
+      lastInput[1] = input[2];
+      // lastInput[2] = field[input[0]-1][input[1]-1];
+      if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
+        field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
+    }
+}
 
 }// end of game loop
 
