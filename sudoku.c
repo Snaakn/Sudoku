@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 uint8_t field[9][9];
+bool isProtected[9][9];
 char lastInput[] = {'0','0','0'};
 
 void draw() {
