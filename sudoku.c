@@ -6,7 +6,7 @@
 
 uint8_t field[9][9];
 bool isProtected[9][9];
-char lastInput[] = {'0','0','0'};
+char lastInput[] = {'0','0','0','0'};
 
 void loadLevel() {
   uint8_t level1[9][9] = {{4,1,0,0,6,5,0,0,7},
@@ -82,12 +82,23 @@ void game(){
   bool validInput[3] = {false,false,false};
   bool isWon = false;
 
-  char input[6] = "------";
+  char input[6] = "0,0,0";
   // game loop
   while(!isWon){
     draw();
     do {
       draw();
+
+      // only if real coordinates are used no zero should be saved
+      if ((input[0] != '0' && input[0] != 'c') &&
+          (input[2] != '0' && input[2] != 'c') &&
+          (input[4] != '0' && input[4] != 'c')) {
+        lastInput[0] = input[0];
+        lastInput[1] = input[2];
+        lastInput[2] = lastInput[3];
+        lastInput[3] = input[4];
+
+      }
       printf("Eingabe: ");
       // fill input with spaces to avoid erros
       //input = "      ";
@@ -95,7 +106,7 @@ void game(){
       const char allowed[] = {'1','2', '3','4','5','6','7','8','9','0'};
       // write input to input via pointer
       scanf("%5s,", &input[0]);
-      printf("%c%c%c\n",input[0],input[2],input[4]);
+      //printf("%c%c%c%c\n",input[0],input[2],input[4],lastInput[2]);
 
 
       validInput[0] = validInput[1] = validInput[2] = false;
@@ -115,9 +126,6 @@ void game(){
         }
 
 
-      // if (input[0]=='0' && input[2]=='0' && input[4]=='0') {
-      //   undo();
-      // }
 
     } while ((input[0]!='c') && ((validInput[0] == false) || (validInput[1] == false) || (validInput[2] == false)));
     // saving last value of input coordinates for undo function
@@ -126,12 +134,16 @@ void game(){
       isWon=check();
     }
     else{
-      lastInput[0] = input[0];
-      lastInput[1] = input[2];
-      // lastInput[2] = field[input[0]-1][input[1]-1];
-      if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
-        field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
-    }
+
+        // Undo operation
+      if (input[0] == '0' && input[2] == '0' && input[4] == '0') {
+        input[0]=lastInput[0];
+        input[2]=lastInput[1];
+        input[4]=lastInput[2];
+      }
+        if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
+          field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
+      }
 }
 
 }// end of game loop
