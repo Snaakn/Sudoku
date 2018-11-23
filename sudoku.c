@@ -8,6 +8,8 @@ uint8_t field[9][9];
 bool isProtected[9][9];
 char lastInput[] = {'0','0','0','0'};
 
+bool colorcheck(uint8_t,uint8_t,uint8_t);
+
 void loadLevel() {
   uint8_t level1[9][9] = {{4,1,0,0,6,5,0,0,7},
                           {0,0,6,0,0,7,4,8,0},
@@ -29,6 +31,7 @@ void loadLevel() {
   }
 }
 
+
 void draw() {
   printf("  __          _     _             \n");
   printf(" (_    | |   | \\   / \\   |/    | |\n");
@@ -43,10 +46,17 @@ void draw() {
     printf("%d |",y+1);
     for (uint8_t x = 0; x < 9; x++) {
       if (field[x][y]!=0)
-        if(isProtected[x][y])
-          printf("[%d]",field[x][y]);
+        if(isProtected[x][y]){
+          if (!colorcheck(x,y,field[x][y]))
+            printf("[\x1B[31m%d\x1B[0m]",field[x][y]);
+          else
+            printf("\x1B[0m[%d]",field[x][y]);
+        }
         else
-        printf(" %d ",field[x][y]);
+        if (!colorcheck(x,y,field[x][y]))
+          printf(" \x1B[31m%d\x1B[0m ",field[x][y]);
+        else
+          printf(" \x1B[0m%d ",field[x][y]);
       else
         printf(" . ");
       if ((x)==2 || (x)==5)
@@ -58,6 +68,37 @@ void draw() {
   }
   printf("  +−−−−−−−−−+−−−−−−−−−+−−−−−−−−−+\n");
 }
+
+bool colorcheck(uint8_t x, uint8_t y, uint8_t num) {
+  uint8_t y_check = 0;
+  uint8_t x_check = 0;
+  if (y >=0 && y <= 2)
+    y_check = 0;
+  else if (y >=3 && y <= 5 )
+    y_check = 3;
+  else if (y >= 6 && y <= 8 )
+    y_check = 6;
+  if (x >=0 && x <= 2)
+    x_check = 0;
+  else if (x >=3 && x <= 5 )
+    x_check = 3;
+  else if (x >=6 && x <= 8 )
+    x_check = 6;
+
+  for (uint8_t j = y_check; j < (y_check + 3); j++) {
+    for (uint8_t i = x_check; i < (x_check + 3); i++) {
+      if (field[i][j] == num && i != x && j != y) {
+        return false;
+      }
+    }
+  }
+  for (uint8_t k = 0; k < 9; k++) {
+    if ((field[k][y] == num && k != x) || (field[x][k] == num && k != y))
+      return false;
+  }
+  return true;
+}
+
 
 bool check() {
   const uint32_t fac9 = 362880;
