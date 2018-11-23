@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-uint8_t field[9][9];
-bool isProtected[9][9];
+static uint8_t field[9][9];
+static bool isProtected[9][9];
 char lastInput[] = {'0','0','0','0'};
 
 bool colorcheck(uint8_t,uint8_t,uint8_t);
@@ -127,6 +127,7 @@ void game(){
   // game loop
   while(!isWon){
     draw();
+    isWon = check();
     do {
       draw();
 
@@ -168,13 +169,13 @@ void game(){
 
 
 
-    } while ((input[0]!='c') && ((validInput[0] == false) || (validInput[1] == false) || (validInput[2] == false)));
+    } while (/*(input[0]!='c') &&*/ ((validInput[0] == false) || (validInput[1] == false) || (validInput[2] == false)));
     // saving last value of input coordinates for undo function
     // idea: timeline for multiple undos
-    if (input[0]=='c'){
-      isWon=check();
-    }
-    else{
+    // if (input[0]=='c'){
+    //   isWon=check();
+    // }
+    // else{
 
         // Undo operation
       if (input[0] == '0' && input[2] == '0' && input[4] == '0') {
@@ -184,7 +185,7 @@ void game(){
       }
         if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
           field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
-      }
+      //}
 }
 
 }// end of game loop
