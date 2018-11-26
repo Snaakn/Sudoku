@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#define FAC9 362880
 
 static uint8_t field[9][9];
 static bool isProtected[9][9];
@@ -101,7 +102,6 @@ bool colorcheck(uint8_t x, uint8_t y, uint8_t num) {
 
 
 bool check() {
-  const uint32_t fac9 = 362880;
   for (uint8_t i = 0; i < 9; i++) {
     uint32_t xfac = 1;
     uint32_t yfac = 1;
@@ -109,7 +109,7 @@ bool check() {
       xfac *= field[i][j];
       yfac *= field[j][i];
     }
-    if (xfac != fac9 || yfac != fac9) {
+    if (xfac != FAC9 || yfac != FAC9) {
       printf("%u %u\n",xfac,yfac);
       printf("\nchecked\n");
       return false;
@@ -127,7 +127,6 @@ void game(){
   // game loop
   while(!isWon){
     draw();
-    isWon = check();
     do {
       draw();
 
@@ -185,6 +184,7 @@ void game(){
       }
         if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
           field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
+          isWon = check();
       //}
 }
 
