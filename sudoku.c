@@ -9,7 +9,7 @@ static uint8_t field[9][9];
 static bool isProtected[9][9];
 char lastInput[] = {'0','0','0','0'};
 
-bool colorcheck(uint8_t,uint8_t,uint8_t);
+uint8_t colorcheck(uint8_t,uint8_t,uint8_t);
 
 void loadLevel() {
   uint8_t level1[9][9] = {{4,1,0,0,6,5,0,0,7},
@@ -48,13 +48,17 @@ void draw() {
     for (uint8_t x = 0; x < 9; x++) {
       if (field[x][y]!=0)
         if(isProtected[x][y]){
-          if (!colorcheck(x,y,field[x][y]))
+          if (colorcheck(x,y,field[x][y]) == 2)
+            printf("[\x1B[32m%d\x1B[0m]",field[x][y]);
+          else if (colorcheck(x,y,field[x][y]) == 0)
             printf("[\x1B[31m%d\x1B[0m]",field[x][y]);
           else
             printf("\x1B[0m[%d]",field[x][y]);
         }
         else
-        if (!colorcheck(x,y,field[x][y]))
+        if (colorcheck(x,y,field[x][y]) == 2)
+          printf(" \x1B[32m%d\x1B[0m ",field[x][y]);
+        else if (colorcheck(x,y,field[x][y]) == 0)
           printf(" \x1B[31m%d\x1B[0m ",field[x][y]);
         else
           printf(" \x1B[0m%d ",field[x][y]);
@@ -70,9 +74,13 @@ void draw() {
   printf("  +−−−−−−−−−+−−−−−−−−−+−−−−−−−−−+\n");
 }
 
-bool colorcheck(uint8_t x, uint8_t y, uint8_t num) {
+uint8_t colorcheck(uint8_t x, uint8_t y, uint8_t num) {
   uint8_t y_check = 0;
   uint8_t x_check = 0;
+  uint32_t xy3fac = 1;
+  uint32_t xfac = 1;
+  uint32_t yfac = 1;
+ // starting point for 3x3 check
   if (y >=0 && y <= 2)
     y_check = 0;
   else if (y >=3 && y <= 5 )
@@ -85,19 +93,27 @@ bool colorcheck(uint8_t x, uint8_t y, uint8_t num) {
     x_check = 3;
   else if (x >=6 && x <= 8 )
     x_check = 6;
-
+  // 3x3 check
   for (uint8_t j = y_check; j < (y_check + 3); j++) {
     for (uint8_t i = x_check; i < (x_check + 3); i++) {
+      xy3fac *= field [i][j];
       if (field[i][j] == num && i != x && j != y) {
-        return false;
+        return 0;
       }
     }
   }
+
+  // line / column check
   for (uint8_t k = 0; k < 9; k++) {
+    xfac *= field [x][k];
+    yfac *= field [k][y];
     if ((field[k][y] == num && k != x) || (field[x][k] == num && k != y))
-      return false;
+      return 0;
   }
-  return true;
+  if (xfac == FAC9 || yfac == FAC9 || xy3fac == FAC9)
+    return 2;
+  else
+    return 1;
 }
 
 
