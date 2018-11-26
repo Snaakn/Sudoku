@@ -7,7 +7,8 @@
 
 static uint8_t field[9][9];
 static bool isProtected[9][9];
-char lastInput[] = {'0','0','0','0'};
+char lastInput[2] = {'0','0'};
+uint8_t lastval = 0;
 
 uint8_t colorcheck(uint8_t,uint8_t,uint8_t);
 
@@ -126,8 +127,6 @@ bool check() {
       yfac *= field[j][i];
     }
     if (xfac != FAC9 || yfac != FAC9) {
-      printf("%u %u\n",xfac,yfac);
-      printf("\nchecked\n");
       return false;
     }
   }
@@ -147,13 +146,14 @@ void game(){
       draw();
 
       // only if real coordinates are used no zero should be saved
-      if ((input[0] != '0' && input[0] != 'c') &&
-          (input[2] != '0' && input[2] != 'c') &&
-          (input[4] != '0' && input[4] != 'c')) {
-        lastInput[0] = input[0];
-        lastInput[1] = input[2];
-        lastInput[2] = lastInput[3];
-        lastInput[3] = input[4];
+      if ((input[0] != '0') &&
+          (input[2] != '0') &&
+          (input[4] != '0')) {
+            lastInput[0] = input[0];
+            lastInput[1] = input[2];
+
+
+          //  lastInput[2] = field[atoi(&input[0])-1][atoi(&input[2])-1];
 
       }
       printf("Eingabe: ");
@@ -194,14 +194,20 @@ void game(){
 
         // Undo operation
       if (input[0] == '0' && input[2] == '0' && input[4] == '0') {
-        input[0]=lastInput[0];
-        input[2]=lastInput[1];
-        input[4]=lastInput[2];
-      }
-        if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1])
-          field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
+        input[0] = lastInput[0];
+        input[2] = lastInput[1];
+        if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1]){
+          field[atoi(&input[2])-1][atoi(&input[0])-1] = lastval;;
           isWon = check();
-      //}
+        }
+        //printf("%c %c %c\n",input[0],input[2],input[4] );
+        //printf("loaded last input\n");
+      }
+      else if(!isProtected[atoi(&input[2])-1][atoi(&input[0])-1]){
+        lastval = field[atoi(&input[2])-1][atoi(&input[0])-1];
+        field[atoi(&input[2])-1][atoi(&input[0])-1] = atoi(&input[4]);
+        isWon = check();
+      }
 }
 
 }// end of game loop
