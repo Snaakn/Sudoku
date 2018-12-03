@@ -10,7 +10,8 @@ static bool isProtected[9][9];
 char lastInput[2] = {'0','0'};
 uint8_t lastval = 0;
 
-uint8_t colorcheck(uint8_t,uint8_t,uint8_t);
+bool isWon = false;
+uint8_t isValid(uint8_t,uint8_t,uint8_t);
 
 void loadLevel() {
   uint8_t level1[9][9] = {{4,1,0,0,6,5,0,0,7},
@@ -49,17 +50,17 @@ void draw() {
     for (uint8_t x = 0; x < 9; x++) {
       if (field[x][y]!=0)
         if(isProtected[x][y]){
-          if (colorcheck(x,y,field[x][y]) == 2)
+          if (isValid(x,y,field[x][y]) == 2)
             printf("[\x1B[32m%d\x1B[0m]",field[x][y]);
-          else if (colorcheck(x,y,field[x][y]) == 0)
+          else if (isValid(x,y,field[x][y]) == 0)
             printf("[\x1B[31m%d\x1B[0m]",field[x][y]);
           else
             printf("\x1B[0m[%d]",field[x][y]);
         }
         else
-        if (colorcheck(x,y,field[x][y]) == 2)
+        if (isValid(x,y,field[x][y]) == 2)
           printf(" \x1B[32m%d\x1B[0m ",field[x][y]);
-        else if (colorcheck(x,y,field[x][y]) == 0)
+        else if (isValid(x,y,field[x][y]) == 0)
           printf(" \x1B[31m%d\x1B[0m ",field[x][y]);
         else
           printf(" \x1B[0m%d ",field[x][y]);
@@ -75,7 +76,7 @@ void draw() {
   printf("  +−−−−−−−−−+−−−−−−−−−+−−−−−−−−−+\n");
 }
 
-uint8_t colorcheck(uint8_t x, uint8_t y, uint8_t num) {
+uint8_t isValid(uint8_t x, uint8_t y, uint8_t num) {
   uint8_t y_check = 0;
   uint8_t x_check = 0;
   uint32_t xy3fac = 1;
@@ -94,7 +95,7 @@ uint8_t colorcheck(uint8_t x, uint8_t y, uint8_t num) {
     x_check = 3;
   else if (x >=6 && x <= 8 )
     x_check = 6;
-  // 3x3 check
+  // // 3x3 check
   for (uint8_t j = y_check; j < (y_check + 3); j++) {
     for (uint8_t i = x_check; i < (x_check + 3); i++) {
       xy3fac *= field [i][j];
@@ -136,7 +137,7 @@ bool check() {
 void game(){
   // validity state of the input array
   bool validInput[3] = {false,false,false};
-  bool isWon = false;
+
 
   char input[6] = "0,0,0";
   // game loop
@@ -212,6 +213,63 @@ void game(){
 
 }// end of game loop
 
+
+void solver(uint8_t x, uint8_t y, uint8_t counter) {
+  draw();
+  //printf("counter: %d\n", counter);
+  isWon = check();
+  if (isWon || counter == 81) {
+    return;
+  }
+    counter ++;
+
+  if (field[x][y] == 0 && !isProtected[x][y]) {
+    for (uint8_t i = 1; i < 10; i++){
+
+      if ((isValid(x,y,i) == 1) || (isValid(x,y,i) == 2)) {
+        field[x][y] = i;
+        if (x < 8) {x++;}
+        else {
+          x = 0;
+          if (y < 8) {y++;}
+          else {y = x = 0;}
+        }
+        solver (x,y,counter);
+      }
+      if (i == 9)
+        if (isValid(x,y,i) == 0 && !isProtected[x][y])
+          field[x][y] = 0;
+    }
+
+    if (x < 9) {x++;}
+    else {
+      x = 0;
+      if (y < 9) {y ++;}
+      else {y = x= 0;}
+    }
+
+    solver (x,y,counter);
+
+
+
+  }
+
+
+  if (x < 9) {x++;}
+  else {
+    x = 0;
+    if (y < 9) {y++;}
+    else {y = x= 0;}
+  }
+  solver (x,y,counter);
+
+
+
+
+
+}
+
+
 int main() {
 // fill field with zeroes to avoid errors
   for (uint8_t y = 0; y < 9; y++) {
@@ -220,7 +278,27 @@ int main() {
     }
   }
   loadLevel();
-  game();
+  //game();
+  uint8_t x = 0;
+  uint8_t y = 0;
+
+    // solver(0,0,0);
+  while (!isWon) {
+    uint8_t c = 0;
+    loadLevel();
+    solver(x,y,c);
+    if (x != 8)
+      x++;
+    else {
+      x = 0;
+      if (y != 8)
+        y++;
+      else
+        y = 0;
+    }
+  }
+
+
   printf("GEWONNEN!\nGut gemacht!\n");
 
 
